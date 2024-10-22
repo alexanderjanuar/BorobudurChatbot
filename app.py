@@ -1,5 +1,4 @@
 import streamlit as st
-from openai import OpenAI
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
