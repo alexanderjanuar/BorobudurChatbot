@@ -7,4 +7,4 @@ langchain-google-genai==2.0.0
 langchain-groq==0.2.0
 langchain-core==0.3.12
 wikipedia==1.4.0
-faiss-gpu
+faiss-cpu
