@@ -186,7 +186,7 @@ with st.sidebar:
             with st.spinner("Creating Conversatation Chain"):
                 create_chain()
             st.success('Conversation Chain has been created, The bot is good to go', icon="✅")
-    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
+    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/alexanderjanuar/BorobudurChatbot)"
 
 st.header("🗿 BoroChat : Your Borobudur Companion",divider="rainbow")
 
