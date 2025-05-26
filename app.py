@@ -88,9 +88,7 @@ def create_retriever():
     pipeline = DocumentCompressorPipeline(transformers=[filter])
     compression_retriever = ContextualCompressionRetriever(base_compressor=pipeline, base_retriever=lotr)
 
-    #Re-ranking existing search & retrieval pipelines
-    compressor = FlashrankRerank()
-    st.session_state["retriever"] = ContextualCompressionRetriever(base_compressor=compressor, base_retriever=compression_retriever)
+    st.session_state["retriever"] = ContextualCompressionRetriever(base_compressor=compression_retriever, base_retriever=compression_retriever)
 
 def create_history_retriever():
     # Define a prompt to turn a question with chat history context
@@ -127,6 +125,7 @@ def create_chain():
         "the question. If you don't know the answer, say that you "
         "don't know. Use three sentences maximum and keep the "
         "answer concise and don't answer questions not related to Candi Borobudur."
+        "Dont Answer Question that does not related to candi borobudur"
         "\n\n"
         "{context}"  # Placeholder for the retrieved context relevant to the question.
     )
