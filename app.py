@@ -72,7 +72,9 @@ def create_retriever():
         search_type="similarity", search_kwargs={"k": 5, "include_metadata": True}
     )
 
+
     st.session_state["retriever"] = retriever_passages
+
 
 def create_history_retriever():
     # Define a prompt to turn a question with chat history context
