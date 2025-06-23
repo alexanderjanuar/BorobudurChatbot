@@ -25,7 +25,6 @@ if "messages" not in st.session_state:
 
 if "groq_key" not in st.session_state:
     st.session_state["groq_key"] = None
-    st.session_state["gemini_key"] = None
 
     
 if "wiki_data" not in st.session_state:
@@ -65,32 +64,15 @@ def process_data():
 def instantiate_embedding():
     st.session_state["indosentencebert_embeddings"] = HuggingFaceEmbeddings(model_name="firqaaa/indo-sentence-bert-base")
     st.session_state["gte_embeddings"] = HuggingFaceEmbeddings(model_name="Alibaba-NLP/gte-multilingual-base", model_kwargs={'trust_remote_code': True})
-    st.session_state["filter_embeddings"] = GoogleGenerativeAIEmbeddings(model="models/embedding-001",google_api_key = st.session_state["gemini_key"])
 
 def create_retriever():
-    db_wiki = FAISS.from_documents(st.session_state["wiki_split"], embedding=st.session_state["indosentencebert_embeddings"])
-    db_passages = FAISS.from_documents(st.session_state["passage_split"], embedding=st.session_state["gte_embeddings"])
+    db_passages = FAISS.from_documents(st.session_state["passage_split"], embedding=st.session_state["indosentencebert_embeddings"])
 
-    # Define 2 diff retrievers with 2 diff embeddings and diff search type.
-    retriever_wiki = db_wiki.as_retriever(
+    retriever_passages = db_passages.as_retriever(
         search_type="similarity", search_kwargs={"k": 5, "include_metadata": True}
     )
-    retriever_passages = db_passages.as_retriever(
-        search_type="mmr", search_kwargs={"k": 5, "include_metadata": True}
-    )
 
-    # The Lord of the Retrievers will hold the output of both retrievers and can be used as any other
-    lotr = MergerRetriever(retrievers=[retriever_wiki, retriever_passages])
-
-    # Remove redundant results from both retrievers using yet another embedding.
-    # Using multiples embeddings in diff steps could help reduce biases.
-    filter = EmbeddingsRedundantFilter(embeddings=st.session_state["filter_embeddings"])
-    pipeline = DocumentCompressorPipeline(transformers=[filter])
-    compression_retriever = ContextualCompressionRetriever(base_compressor=pipeline, base_retriever=lotr)
-
-    #Re-ranking existing search & retrieval pipelines
-    compressor = FlashrankRerank()
-    st.session_state["retriever"] = ContextualCompressionRetriever(base_compressor=compressor, base_retriever=compression_retriever)
+    st.session_state["retriever"] = retriever_passages
 
 def create_history_retriever():
     # Define a prompt to turn a question with chat history context
@@ -127,6 +109,7 @@ def create_chain():
         "the question. If you don't know the answer, say that you "
         "don't know. Use three sentences maximum and keep the "
         "answer concise and don't answer questions not related to Candi Borobudur."
+        "Dont Answer Question that does not related to candi borobudur"
         "\n\n"
         "{context}"  # Placeholder for the retrieved context relevant to the question.
     )
@@ -163,9 +146,8 @@ st.set_page_config(
 
 with st.sidebar:
     st.session_state["groq_key"] = st.text_input("Groq API Key", type="password")
-    st.session_state["gemini_key"] = st.text_input("Gemini API Key", type="password")
     st.divider()
-    if st.session_state["groq_key"] and st.session_state["gemini_key"]:
+    if st.session_state["groq_key"]:
         if not st.session_state["rag_chain"]:
             with st.spinner("Loading Data"):
                 load_data()
